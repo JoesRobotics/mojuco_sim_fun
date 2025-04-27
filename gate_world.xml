@@ -1,0 +1,32 @@
+# gate_world.xml
+
+<mujoco model="skydio_gate">
+    <compiler angle="degree" coordinate="local"/>
+    <option gravity="0 0 -9.81"/>
+
+    <worldbody>
+        <!-- Ground -->
+        <geom name="floor" type="plane" size="10 10 0.1" rgba="0.8 0.8 0.8 1"/>
+
+        <!-- Drone -->
+        <body name="drone" pos="0 0 1">
+            <freejoint/>
+            <geom type="sphere" size="0.1" rgba="0 0 1 1"/>
+        </body>
+
+        <!-- Gate 1 -->
+        <body name="gate1" pos="1.5 0.0 1.0">
+            <geom type="cylinder" size="0.5 0.02" rgba="1 0 0 0.5"/>
+        </body>
+
+        <!-- Gate 2 -->
+        <body name="gate2" pos="3.0 1.0 1.5">
+            <geom type="cylinder" size="0.5 0.02" rgba="0 1 0 0.5"/>
+        </body>
+
+        <!-- Gate 3 -->
+        <body name="gate3" pos="4.5 -1.0 1.2">
+            <geom type="cylinder" size="0.5 0.02" rgba="0 0 1 0.5"/>
+        </body>
+    </worldbody>
+</mujoco>

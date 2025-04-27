@@ -1,0 +1,29 @@
+# fr3_drawing_scene.xml
+
+<mujoco model="fr3_drawing">
+    <compiler angle="degree" coordinate="local"/>
+    <option gravity="0 0 -9.81"/>
+
+    <worldbody>
+        <!-- Ground -->
+        <geom name="floor" type="plane" size="5 5 0.1" rgba="0.8 0.8 0.8 1"/>
+
+        <!-- Easel (Vertical Board) -->
+        <body name="easel" pos="0.6 0 0.4">
+            <geom type="box" size="0.02 0.4 0.3" rgba="1 1 1 1"/>
+        </body>
+
+        <!-- Franka Base -->
+        <body name="franka_base" pos="0 0 0">
+            <freejoint/>
+            <include file="franka_fr3.xml"/>
+        </body>
+    </worldbody>
+
+    <asset>
+        <texture name="grid" type="2d" builtin="checker" width="512" height="512" rgb1="0.8 0.8 0.8" rgb2="0.6 0.6 0.6"/>
+        <material name="grid_mat" texture="grid" texrepeat="1 1"/>
+    </asset>
+
+    <site name="gripper_site" pos="0 0 0" size="0.01" rgba="1 0 0 1"/>
+</mujoco>
