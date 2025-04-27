@@ -40,7 +40,7 @@ Boston Dynamics Spot shows off a fun little dance routine (head bobs, spins, paw
 
 3. **Clone this repository**
    ```bash
-   git clone https://github.com/yourname/robotics-fun-simulations.git
+   git clone https://github.com/JoesRobotics/mojuco_sim_fun.git
    cd robotics-fun-simulations
    ```
 
