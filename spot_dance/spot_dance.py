@@ -1,5 +1,3 @@
-# spot_dance.py updated for full 12-actuator Spot with Correct GIF Export
-
 import mujoco
 import mujoco.viewer
 import numpy as np
@@ -7,67 +5,47 @@ import imageio
 import os
 import time
 
-# Create media directory if it doesn't exist
+# Ensure the media directory exists
 os.makedirs('media', exist_ok=True)
 
 # Load the model
-model = mujoco.MjModel.from_xml_path('spot_dance_scene.xml')
+model = mujoco.MjModel.from_xml_path('scene.xml')
 data = mujoco.MjData(model)
 
 # Prepare GIF frame storage
 frames = []
 
-# Define dance steps (target joint positions for 12 actuators)
+# Define dance steps (simple joint position targets)
 dance_moves = [
-    {'time': 0, 'pose': [0.0]*12},  # Stand still
-    {'time': 2, 'pose': [0.5, 0.2, -0.5, -0.5, -0.2, 0.5, 0.5, 0.2, -0.5, -0.5, -0.2, 0.5]},  # Sway left
-    {'time': 4, 'pose': [-0.5, -0.2, 0.5, 0.5, 0.2, -0.5, -0.5, -0.2, 0.5, 0.5, 0.2, -0.5]},  # Sway right
-    {'time': 6, 'pose': [0.0]*12},  # Reset
-    {'time': 8, 'pose': [0.0, 0.3, -0.4, 0.0, 0.3, -0.4, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0]},  # Bow
-    {'time': 10, 'pose': [0.0]*12},  # Reset
-    {'time': 12, 'pose': [0.0, 0.0, 0.8, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0]},  # Lift left paw
-    {'time': 14, 'pose': [0.0, 0.0, 0.6, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0]},  # Wave
-    {'time': 16, 'pose': [0.0]*12}   # End
+    {'duration': 2.0, 'pose': [0.0]*12},  # Neutral pose
+    {'duration': 2.0, 'pose': [0.2, -0.2, 0.2, -0.2]*3},  # Sway left
+    {'duration': 2.0, 'pose': [-0.2, 0.2, -0.2, 0.2]*3},  # Sway right
+    {'duration': 2.0, 'pose': [0.0]*12},  # Back to neutral
 ]
 
-# Control all 12 actuators directly
-controlled_joints = [i for i in range(model.nu)]
+# Get joint indices
+joint_names = [model.joint(i).name for i in range(model.njnt)]
+controlled_joints = [i for i, name in enumerate(joint_names) if 'hip' in name or 'knee' in name]
 
-# Initialize viewer and offscreen renderer
+# Initialize viewer
 with mujoco.viewer.launch_passive(model, data) as viewer:
-    offscreen = mujoco.Renderer(model)
-    print("Starting Full Spot Dance Simulation and Recording...")
+    print("Starting Spot Dance Simulation and Recording...")
 
-    t0 = time.time()
-    move_idx = 0
-
-    while viewer.is_running():
-        mujoco.mj_step(model, data)
-
-        t = time.time() - t0
-
-        # Update dance move if needed
-        if move_idx + 1 < len(dance_moves) and t > dance_moves[move_idx+1]['time']:
-            move_idx += 1
-
-        # Set joint targets
-        if controlled_joints:
-            target_pose = dance_moves[move_idx]['pose']
+    for move in dance_moves:
+        start_time = time.time()
+        while time.time() - start_time < move['duration']:
+            mujoco.mj_step(model, data)
             for idx, joint_id in enumerate(controlled_joints):
-                data.ctrl[joint_id] = target_pose[idx]
+                if idx < len(move['pose']):
+                    data.ctrl[joint_id] = move['pose'][idx]
+            frame = viewer.read_pixels()
+            frames.append(frame)
+            viewer.sync()
 
-        # Render offscreen frame
-        offscreen.update_scene(data)
-        pixels = offscreen.render()
-
-        frames.append(pixels)
-
-        viewer.sync()
-
-    offscreen.close()
     print("Simulation Ended, Saving GIF...")
 
 # Save frames to GIF
 output_path = 'media/spot_dance.gif'
 imageio.mimsave(output_path, frames, fps=20)
 print(f"GIF saved to {output_path}")
+
