@@ -1,13 +1,21 @@
-# fr3_drawing.py
+# fr3_drawing.py with GIF Export
 
 import mujoco
 import mujoco.viewer
 import numpy as np
+import imageio
+import os
 import time
+
+# Create media directory if it doesn't exist
+os.makedirs('media', exist_ok=True)
 
 # Load the model
 model = mujoco.MjModel.from_xml_path('fr3_drawing_scene.xml')
 data = mujoco.MjData(model)
+
+# Prepare GIF frame storage
+frames = []
 
 # Define waypoints for the drawing (simple square robot face)
 drawing_path = [
@@ -25,7 +33,7 @@ Kp = 5.0
 
 # Initialize viewer
 with mujoco.viewer.launch_passive(model, data) as viewer:
-    print("Starting FR3 Drawing Simulation")
+    print("Starting FR3 Drawing Simulation and Recording...")
     
     # Sim loop
     waypoint_idx = 0
@@ -56,6 +64,16 @@ with mujoco.viewer.launch_passive(model, data) as viewer:
                 break
             target_pos = drawing_path[waypoint_idx]
 
+        # Capture frame
+        frame = viewer.read_pixels()
+        frames.append(frame)
+
         viewer.sync()
 
-    print("Simulation Ended")
+    print("Simulation Ended, Saving GIF...")
+
+# Save frames to GIF
+output_path = 'media/fr3_drawing.gif'
+imageio.mimsave(output_path, frames, fps=20)
+print(f"GIF saved to {output_path}")
+

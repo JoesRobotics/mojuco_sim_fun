@@ -1,13 +1,21 @@
-# spot_dance.py
+# spot_dance.py with GIF Export
 
 import mujoco
 import mujoco.viewer
 import numpy as np
+import imageio
+import os
 import time
+
+# Create media directory if it doesn't exist
+os.makedirs('media', exist_ok=True)
 
 # Load the model
 model = mujoco.MjModel.from_xml_path('spot_dance_scene.xml')
 data = mujoco.MjData(model)
+
+# Prepare GIF frame storage
+frames = []
 
 # Define dance steps (target joint positions)
 dance_moves = [
@@ -28,7 +36,7 @@ controlled_joints = [i for i, name in enumerate(joint_names) if 'knee' in name o
 
 # Initialize viewer
 with mujoco.viewer.launch_passive(model, data) as viewer:
-    print("Starting Spot Dance Simulation")
+    print("Starting Spot Dance Simulation and Recording...")
 
     t0 = time.time()
     move_idx = 0
@@ -48,6 +56,16 @@ with mujoco.viewer.launch_passive(model, data) as viewer:
             for idx, joint_id in enumerate(controlled_joints):
                 data.ctrl[joint_id] = target_pose[idx]
 
+        # Capture frame
+        frame = viewer.read_pixels()
+        frames.append(frame)
+
         viewer.sync()
 
-    print("Simulation Ended")
+    print("Simulation Ended, Saving GIF...")
+
+# Save frames to GIF
+output_path = 'media/spot_dance.gif'
+imageio.mimsave(output_path, frames, fps=20)
+print(f"GIF saved to {output_path}")
+

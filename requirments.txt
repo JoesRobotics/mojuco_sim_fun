@@ -1,9 +1,9 @@
 # Core dependencies
 mujoco>=2.3.0      # Physics engine and viewer
 numpy>=1.20        # Math operations for control
+imageio            # Save frames and create GIFs
+opencv-python      # Capture frames, manipulate images
 
 # Optional tools for making videos / GIFs
-#imageio            # Save frames and create GIFs (optional)
-#opencv-python      # Capture frames, manipulate images (optional)
 #matplotlib         # Plotting (if you want to visualize trajectories)
 

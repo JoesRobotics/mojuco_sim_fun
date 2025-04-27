@@ -1,12 +1,21 @@
-# skydio_gate.py
+# skydio_gate.py with GIF Export
 
 import mujoco
 import mujoco.viewer
 import numpy as np
+import imageio
+import os
+import time
+
+# Create media directory if it doesn't exist
+os.makedirs('media', exist_ok=True)
 
 # Load the model
 model = mujoco.MjModel.from_xml_path('gate_world.xml')
 data = mujoco.MjData(model)
+
+# Prepare GIF frame storage
+frames = []
 
 # Define waypoints at the center of each gate
 waypoints = np.array([
@@ -20,7 +29,7 @@ Kp_ori = 10.0
 
 # Initialize viewer
 with mujoco.viewer.launch_passive(model, data) as viewer:
-    print("Starting Skydio X2 Gate Navigation Simulation")
+    print("Starting Skydio X2 Gate Navigation Simulation and Recording...")
 
     waypoint_idx = 0
     target_pos = waypoints[waypoint_idx]
@@ -48,6 +57,16 @@ with mujoco.viewer.launch_passive(model, data) as viewer:
                 break
             target_pos = waypoints[waypoint_idx]
 
+        # Capture frame
+        frame = viewer.read_pixels()
+        frames.append(frame)
+
         viewer.sync()
 
-    print("Simulation Ended")
+    print("Simulation Ended, Saving GIF...")
+
+# Save frames to GIF
+output_path = 'media/skydio_gate.gif'
+imageio.mimsave(output_path, frames, fps=20)
+print(f"GIF saved to {output_path}")
+
